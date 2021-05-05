@@ -1,5 +1,6 @@
 const e = require("express");
 const paypal = require("paypal-rest-sdk");
+const checkoutNodeJssdk = require("@paypal/checkout-server-sdk");
 
 class PaymentController {
   async Order(req, res, next) {
@@ -58,8 +59,6 @@ class PaymentController {
     const payerId = req.query.PayerID;
     const paymentId = req.query.paymentId;
     const price = req.query.price;
-    const idDonHang = req.query.idDonHang;
-    var update = { ThanhToan: "Đã Thanh Toán" };
     const execute_payment_json = {
       payer_id: payerId,
       transactions: [
@@ -78,7 +77,7 @@ class PaymentController {
         if (error) {
           res.status(400).send("Payment Fail");
         } else {
-          res.status(200).send("Success");
+          res.status(200).send(payment);
         }
       }
     );
@@ -86,6 +85,32 @@ class PaymentController {
 
   async CancelPayment(req, res, next) {
     res.status(400).send("Payment is canceled");
+  }
+
+  async RefundPayment(req, res, next) {
+    const {idPayment, transaction} = req.body;
+    const data = {
+      amount: {
+        total: `${transaction}`,
+        currency: 'USD'
+      }
+    };
+
+    paypal.sale.refund(idPayment, data, function (error, refund){
+      if (error){
+        res.status(200).send({
+          msg: 'Refund fail!',
+          data: '',
+          error: error,
+        });
+      } else {
+        res.status(200).send({
+          msg: 'Refund success!',
+          data: refund,
+          error: '',
+        });
+      }
+    });
   }
 }
 
