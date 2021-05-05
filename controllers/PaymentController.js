@@ -1,6 +1,5 @@
 const e = require("express");
 const paypal = require("paypal-rest-sdk");
-const checkoutNodeJssdk = require("@paypal/checkout-server-sdk");
 
 class PaymentController {
   async Order(req, res, next) {
